@@ -2,6 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'package:bookstore/src/routing/simple_navigator.dart';
 import 'package:flutter/material.dart';
 
 import '../routing.dart';
@@ -24,24 +25,29 @@ class BookstoreScaffoldBody extends StatelessWidget {
 
     // A nested Router isn't necessary because the back button behavior doesn't
     // need to be customized.
-    return Navigator(
-      key: navigatorKey,
+    return SimpleNavigator(
+      exactMatch: true,
+      pathTemplate: currentRoute.pathTemplate,
+      navKey: navigatorKey,
       onPopPage: (route, dynamic result) => route.didPop(result),
       pages: [
-        if (currentRoute.pathTemplate.startsWith('/authors'))
+        // REMOVED
+        //if (currentRoute.pathTemplate.startsWith('/authors'))
           const FadeTransitionPage<void>(
-            key: ValueKey('authors'),
+            key: ValueKey('/authors'),
             child: AuthorsScreen(),
-          )
-        else if (currentRoute.pathTemplate.startsWith('/settings'))
+          ),
+        // REMOVED
+        //else if (currentRoute.pathTemplate.startsWith('/settings'))
           const FadeTransitionPage<void>(
-            key: ValueKey('settings'),
+            key: ValueKey('/settings'),
             child: SettingsScreen(),
-          )
-        else if (currentRoute.pathTemplate.startsWith('/books') ||
-            currentRoute.pathTemplate == '/')
+          ),
+        // REMOVED
+        //else if (currentRoute.pathTemplate.startsWith('/books') ||
+           // currentRoute.pathTemplate == '/')
           FadeTransitionPage<void>(
-            key: const ValueKey('books'),
+            key: const ValueKey('/books'),
             child: BooksScreen(currentRoute: currentRoute),
           )
 
@@ -51,11 +57,11 @@ class BookstoreScaffoldBody extends StatelessWidget {
           // Since RouteStateScope is an InheritedNotifier, any change to the
           // route will result in a call to this build method, even though this
           // widget isn't built when those routes are active.
-        else
-          FadeTransitionPage<void>(
-            key: const ValueKey('empty'),
-            child: Container(),
-          ),
+        // else
+        //   FadeTransitionPage<void>(
+        //     key: const ValueKey('empty'),
+        //     child: Container(),
+        //   ),
       ],
     );
   }

@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../data.dart';
+import '../routing.dart';
 import '../widgets/book_list.dart';
 import 'book_details.dart';
 
@@ -29,15 +30,16 @@ class AuthorDetailsScreen extends StatelessWidget {
               child: BookList(
                 books: author.books,
                 onTap: (book) {
-                  Navigator.of(context).push<dynamic>(
-                    MaterialPageRoute<dynamic>(
-                      builder: (context) {
-                        return BookDetailsScreen(
-                          book: book,
-                        );
-                      },
-                    ),
-                  );
+                  // Navigator.of(context).push<dynamic>(
+                  //   MaterialPageRoute<dynamic>(
+                  //     builder: (context) {
+                  //       return BookDetailsScreen(
+                  //         book: book,
+                  //       );
+                  //     },
+                  //   ),
+                  // );
+                  RouteStateScope.of(context)!.go('/book/${book.id}');
                 },
               ),
             ),

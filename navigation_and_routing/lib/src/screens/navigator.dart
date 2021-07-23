@@ -2,6 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+import 'package:bookstore/src/routing/simple_navigator.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
@@ -30,10 +31,10 @@ class BookstoreNavigator extends StatefulWidget {
 }
 
 class _BookstoreNavigatorState extends State<BookstoreNavigator> {
-  final signInKey = const ValueKey('Sign in');
-  final scaffoldKey = const ValueKey<String>('App scaffold');
-  final bookDetailsKey = const ValueKey<String>('Book details screen');
-  final authorDetailsKey = const ValueKey<String>('Author details screen');
+  final signInKey = const ValueKey('/signin');
+  final scaffoldKey = const ValueKey<String>('/');
+  final bookDetailsKey = const ValueKey<String>('/book/:bookId');
+  final authorDetailsKey = const ValueKey<String>('/author/:authorId');
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +55,9 @@ class _BookstoreNavigatorState extends State<BookstoreNavigator> {
           (b) => b.id.toString() == routeState.route.parameters['authorId']);
     }
 
-    return Navigator(
-      key: widget.navigatorKey,
+    return SimpleNavigator(
+      pathTemplate: pathTemplate,
+      navKey: widget.navigatorKey,
       onPopPage: (route, dynamic result) {
         // When a page that is stacked on top of the scaffold is popped, display
         // the /books or /authors tab in BookstoreScaffold.
@@ -94,20 +96,24 @@ class _BookstoreNavigatorState extends State<BookstoreNavigator> {
           ),
           // Add an additional page to the stack if the user is viewing a book
           // or an author
-          if (selectedBook != null)
-            MaterialPage<void>(
-              key: bookDetailsKey,
-              child: BookDetailsScreen(
-                book: selectedBook,
-              ),
-            )
-          else if (selectedAuthor != null)
-            MaterialPage<void>(
-              key: authorDetailsKey,
-              child: AuthorDetailsScreen(
-                author: selectedAuthor,
-              ),
+          // REMOVED
+          //if (selectedBook != null)
+          MaterialPage<void>(
+            key: bookDetailsKey,
+            child: BookDetailsScreen(
+              book: selectedBook,
             ),
+          ),
+          // REMOVED
+          //else if (selectedAuthor != null)
+          MaterialPage<void>(
+            key: authorDetailsKey,
+            child: AuthorDetailsScreen(
+              // This need a better approach when no author is selected
+              author: selectedAuthor ??
+                  Author(1, 'xxxx', [Book(1, 'xxxxx', false, false)]),
+            ),
+          ),
         ],
       ],
     );
