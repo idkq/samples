@@ -26,42 +26,27 @@ class BookstoreScaffoldBody extends StatelessWidget {
     // A nested Router isn't necessary because the back button behavior doesn't
     // need to be customized.
     return SimpleNavigator(
-      exactMatch: true,
       pathTemplate: currentRoute.pathTemplate,
       navKey: navigatorKey,
-      onPopPage: (route, dynamic result) => route.didPop(result),
       pages: [
-        // REMOVED
-        //if (currentRoute.pathTemplate.startsWith('/authors'))
-          const FadeTransitionPage<void>(
-            key: ValueKey('/authors'),
-            child: AuthorsScreen(),
-          ),
-        // REMOVED
-        //else if (currentRoute.pathTemplate.startsWith('/settings'))
-          const FadeTransitionPage<void>(
-            key: ValueKey('/settings'),
-            child: SettingsScreen(),
-          ),
-        // REMOVED
-        //else if (currentRoute.pathTemplate.startsWith('/books') ||
-           // currentRoute.pathTemplate == '/')
-          FadeTransitionPage<void>(
-            key: const ValueKey('/books'),
-            child: BooksScreen(currentRoute: currentRoute),
-          )
-
-          // Avoid building a Navigator with an empty `pages` list when the
-          // RouteState is set to an unexpected path, such as /signin.
-          //
-          // Since RouteStateScope is an InheritedNotifier, any change to the
-          // route will result in a call to this build method, even though this
-          // widget isn't built when those routes are active.
-        // else
-        //   FadeTransitionPage<void>(
-        //     key: const ValueKey('empty'),
-        //     child: Container(),
-        //   ),
+        SimplePage(
+            url: '/authors',
+            child: const FadeTransitionPage<void>(
+              key: ValueKey('AuthorsScreen'),
+              child: AuthorsScreen(),
+            )),
+        SimplePage(
+            url: '/settings',
+            child: const FadeTransitionPage<void>(
+              key: ValueKey('SettingsScreen'),
+              child: SettingsScreen(),
+            )),
+        SimplePage(
+            url: '/books',
+            child: FadeTransitionPage<void>(
+              key: const ValueKey('BooksScreen'),
+              child: BooksScreen(currentRoute: currentRoute),
+            ))
       ],
     );
   }

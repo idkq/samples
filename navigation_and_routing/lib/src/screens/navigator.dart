@@ -31,11 +31,6 @@ class BookstoreNavigator extends StatefulWidget {
 }
 
 class _BookstoreNavigatorState extends State<BookstoreNavigator> {
-  final signInKey = const ValueKey('/signin');
-  final scaffoldKey = const ValueKey<String>('/');
-  final bookDetailsKey = const ValueKey<String>('/book/:bookId');
-  final authorDetailsKey = const ValueKey<String>('/author/:authorId');
-
   @override
   Widget build(BuildContext context) {
     final routeState = RouteStateScope.of(context)!;
@@ -58,63 +53,45 @@ class _BookstoreNavigatorState extends State<BookstoreNavigator> {
     return SimpleNavigator(
       pathTemplate: pathTemplate,
       navKey: widget.navigatorKey,
-      onPopPage: (route, dynamic result) {
-        // When a page that is stacked on top of the scaffold is popped, display
-        // the /books or /authors tab in BookstoreScaffold.
-        if (route.settings is Page &&
-            (route.settings as Page).key == bookDetailsKey) {
-          routeState.go('/books/popular');
-        }
-
-        if (route.settings is Page &&
-            (route.settings as Page).key == authorDetailsKey) {
-          routeState.go('/authors');
-        }
-
-        return route.didPop(result);
-      },
       pages: [
-        if (routeState.route.pathTemplate == '/signin')
-          // Display the sign in screen.
-          FadeTransitionPage<void>(
-            key: signInKey,
-            child: SignInScreen(
-              onSignIn: (credentials) async {
-                var signedIn = await authState.signIn(
-                    credentials.username, credentials.password);
-                if (signedIn) {
-                  routeState.go('/books/popular');
-                }
-              },
-            ),
-          )
-        else ...[
-          // Display the app
-          FadeTransitionPage<void>(
-            key: scaffoldKey,
-            child: const BookstoreScaffold(),
-          ),
-          // Add an additional page to the stack if the user is viewing a book
-          // or an author
-          // REMOVED
-          //if (selectedBook != null)
-          MaterialPage<void>(
-            key: bookDetailsKey,
-            child: BookDetailsScreen(
-              book: selectedBook,
-            ),
-          ),
-          // REMOVED
-          //else if (selectedAuthor != null)
-          MaterialPage<void>(
-            key: authorDetailsKey,
-            child: AuthorDetailsScreen(
-              // This need a better approach when no author is selected
-              author: selectedAuthor ??
-                  Author(1, 'xxxx', [Book(1, 'xxxxx', false, false)]),
-            ),
-          ),
-        ],
+        SimplePage(
+            url: '/signin',
+            guardActive: !authState.signedIn,
+            child: FadeTransitionPage<void>(
+              child: SignInScreen(
+                onSignIn: (credentials) async {
+                  var signedIn = await authState.signIn(
+                      credentials.username, credentials.password);
+                  if (signedIn) {
+                    routeState.go('/books/popular');
+                  }
+                },
+              ),
+            )),
+        // Display the app
+        SimplePage(
+            scaffold: true,
+            child: const FadeTransitionPage<void>(
+              child: BookstoreScaffold(),
+            )),
+        SimplePage(
+            url: '/book/:bookId',
+            parentUrl: '/books',
+            child: MaterialPage<void>(
+              child: BookDetailsScreen(
+                book: selectedBook,
+              ),
+            )),
+        SimplePage(
+            url: '/author/:authorId',
+            parentUrl: '/authors',
+            child: MaterialPage<void>(
+              child: (selectedAuthor != null)
+                  ? AuthorDetailsScreen(
+                      author: selectedAuthor,
+                    )
+                  : const SizedBox.shrink(),
+            )),
       ],
     );
   }
