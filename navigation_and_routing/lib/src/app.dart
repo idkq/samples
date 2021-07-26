@@ -23,7 +23,7 @@ class _BookstoreState extends State<Bookstore> {
   late final RouteState routeState;
   late final SimpleRouterDelegate routerDelegate;
   late final TemplateRouteParser routeParser;
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>(debugLabel: 'outerNav');
 
   final library = Library()
     ..addBook(

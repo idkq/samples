@@ -3,6 +3,8 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:bookstore/src/routing/simple_navigator.dart';
+import 'package:bookstore/src/routing/simple_page.dart';
+import 'package:bookstore/src/routing/stacking_logic.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
@@ -51,7 +53,8 @@ class _BookstoreNavigatorState extends State<BookstoreNavigator> {
     }
 
     return SimpleNavigator(
-      pathTemplate: pathTemplate,
+      stackingLogic: AncestorStackingLogic(pathTemplate),
+      currentUrl: pathTemplate,
       navKey: widget.navigatorKey,
       pages: [
         SimplePage(
@@ -70,7 +73,7 @@ class _BookstoreNavigatorState extends State<BookstoreNavigator> {
             )),
         // Display the app
         SimplePage(
-            scaffold: true,
+            alwaysPresent: true,
             child: const FadeTransitionPage<void>(
               child: BookstoreScaffold(),
             )),

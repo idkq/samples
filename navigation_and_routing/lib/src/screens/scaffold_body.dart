@@ -3,6 +3,8 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:bookstore/src/routing/simple_navigator.dart';
+import 'package:bookstore/src/routing/simple_page.dart';
+import 'package:bookstore/src/routing/stacking_logic.dart';
 import 'package:flutter/material.dart';
 
 import '../routing.dart';
@@ -13,7 +15,7 @@ import 'books.dart';
 
 /// Displays the contents of the body of [BookstoreScaffold]
 class BookstoreScaffoldBody extends StatelessWidget {
-  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>(debugLabel: 'innerNav');
 
   const BookstoreScaffoldBody({
     Key? key,
@@ -26,7 +28,8 @@ class BookstoreScaffoldBody extends StatelessWidget {
     // A nested Router isn't necessary because the back button behavior doesn't
     // need to be customized.
     return SimpleNavigator(
-      pathTemplate: currentRoute.pathTemplate,
+      stackingLogic: AncestorStackingLogic(currentRoute.pathTemplate),
+      currentUrl: currentRoute.pathTemplate,
       navKey: navigatorKey,
       pages: [
         SimplePage(

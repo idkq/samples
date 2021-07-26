@@ -1,19 +1,29 @@
+import 'package:bookstore/src/routing/simple_page.dart';
+import 'package:bookstore/src/routing/stacking_logic.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../routing.dart';
 
+/// Replaces [Navigator] and automatically stack pages based on their url.
+///
+/// A list of [SimplePage] is required which replaces [Page] objects
+///
+/// A [StackingLogic] is required to determine which pages will be stacked
+///
 class SimpleNavigator extends StatelessWidget {
   final List<SimplePage> pages;
-  final String pathTemplate;
+  final String currentUrl;
   final Key navKey;
+  final StackingLogic stackingLogic;
 
-  const SimpleNavigator({
-    Key? key,
-    required this.navKey,
-    required this.pages,
-    required this.pathTemplate,
-  }) : super(key: key);
+  const SimpleNavigator(
+      {Key? key,
+        required this.navKey,
+        required this.pages,
+        required this.currentUrl,
+        required this.stackingLogic})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,14 +36,14 @@ class SimpleNavigator extends StatelessWidget {
     // Normal flow
     else {
       // Scaffold is added first, if exists
-      final scaffold = getScaffold();
-      if (scaffold != null) {
-        newPages.add(scaffold.child);
+      final alwaysPresent = getScaffold();
+      if (alwaysPresent != null) {
+        newPages.add(alwaysPresent.child);
       }
 
       // Filtered stack
-      final stack = getStack();
-      newPages.addAll(stack);
+      final stack = stackingLogic.stack(pages);
+      newPages.addAll(stack.map((e) => e.child));
     }
 
     debug(newPages);
@@ -43,14 +53,10 @@ class SimpleNavigator extends StatelessWidget {
       pages: newPages,
       onPopPage: (route, dynamic result) {
         if (route.settings is Page) {
-          // Find matching url for child that has a parent
-          final child = pages.firstWhereOrNull((element) =>
-              element.parentUrl != null && element.url == pathTemplate);
-
-          // If child exists, go to parent
-          if (child != null) {
+          final redirect = stackingLogic.popRedirect(pages);
+          if (redirect != null) {
             final routeState = RouteStateScope.of(context)!;
-            routeState.go(child.parentUrl!);
+            routeState.go(redirect);
           }
         }
 
@@ -60,27 +66,11 @@ class SimpleNavigator extends StatelessWidget {
   }
 
   SimplePage? getScaffold() {
-    final scaffold = pages.firstWhereOrNull((element) => element.scaffold);
+    final scaffold = pages.firstWhereOrNull((element) => element.alwaysPresent);
     return scaffold;
   }
 
-  List<Page> getStack() {
-    return pages
-        .where((element) => shouldStack(element.url ?? '', pathTemplate))
-        .map((e) => e.child)
-        .toList();
-  }
-
-  bool shouldStack(String current, String path) {
-    if (current == path) return true;
-
-    final p = getParent(path);
-    if (p != null) return current.startsWith(p);
-
-    return false;
-  }
-
-  String? getParent(String path) {
+  static String? getParent(String path) {
     final regEx = RegExp('/.*(?=(\/))');
     final root = regEx.firstMatch(path);
     if (root != null) return root.group(0)!;
@@ -99,28 +89,11 @@ class SimpleNavigator extends StatelessWidget {
   void debug(List<Page> newPages) {
     print('*******');
     print(
-        'nav:${navKey.toString()} pathTemplate: "$pathTemplate" pages given (* stacked):');
+        'nav:${navKey.toString()} pathTemplate: "$currentUrl" pages given (* stacked):');
     for (final page in pages) {
       final s = newPages.firstWhereOrNull((element) => page.child == element);
 
-      print('${page.url} ${(s == null) ? '' : '*'}');
+      print('${page.url ?? '(scaffold)'} ${(s == null) ? '' : '*'}');
     }
   }
-}
-
-class SimplePage {
-  final Page child;
-  final bool guardActive;
-  final bool scaffold;
-  final String? url;
-  final String? parentUrl;
-
-  SimplePage(
-      {required this.child,
-      this.guardActive = false,
-      this.scaffold = false,
-      this.url,
-      this.parentUrl})
-      : assert(url == null && scaffold == true || url != null,
-            'Url required. Except for scaffold');
 }
