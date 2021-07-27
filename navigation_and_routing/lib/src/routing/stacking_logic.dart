@@ -72,22 +72,20 @@ class ParentStackingLogic extends StackingLogic {
   bool shouldStack(SimplePage current, List<SimplePage> all, String path) {
     if (current.url == path) return true;
 
-    return getParent(current.url ?? '', all, path) != null;
+    final child =
+    all.firstWhereOrNull((element) => element.url == path);
+
+    final allParents = getAllParents(child!, all);
+
+    return allParents.contains(current.url);
   }
 
-  // Recursive lookup
-  String? getParent(String current, List<SimplePage> all, String path ){
-    final parentUrl =
-    all.firstWhereOrNull((element) => element.parentUrl == current);
-    if (parentUrl!=null) {
-      if (parentUrl.url == path) {
-        return 'found stack';
-      } else {
-        return getParent(parentUrl.url!, all, path);
-      }
-    }
+  List<String> getAllParents(SimplePage child, List<SimplePage> all) {
+    final p = all.firstWhereOrNull((element) => element.url == child.parentUrl);
 
-    return null;
+    if (p != null) return getAllParents(p, all)..add(p.url!);
+
+    return [];
   }
 
   @override
